@@ -5,14 +5,19 @@
 	// Enable strict mode
 	"use strict";
 
+	w.picturefill_opts = {
+		wrapperTag: 'span',
+		imageTag: 'span'
+	};
+
 	w.picturefill = function() {
-		var ps = w.document.getElementsByTagName( "div" );
+		var ps = w.document.getElementsByTagName( w.picturefill_opts.wrapperTag );
 		
 		// Loop the pictures
 		for( var i = 0, il = ps.length; i < il; i++ ){
 			if( ps[ i ].getAttribute( "data-picture" ) !== null ){
 
-				var sources = ps[ i ].getElementsByTagName( "div" ),
+				var sources = ps[ i ].getElementsByTagName( w.picturefill_opts.imageTag ),
 					matches = [];
 			
 				// See if which sources match

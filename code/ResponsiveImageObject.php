@@ -16,6 +16,8 @@ class ResponsiveImageObject extends Image {
 
 	static $default_width_name = 'Small';
 
+	protected $imageTag = null;
+
 	function getCMSFields() {
 		$fields = parent::getCMSFields();
 
@@ -56,6 +58,10 @@ class ResponsiveImageObject extends Image {
 		return $this->SetWidth($width);
 	}
 
+	function setImageTag($value) {
+		$this->imageTag = $value;
+	}
+
 	/**
 	 * returns the image tag for a specific or all sizes
 	 *
@@ -69,7 +75,7 @@ class ResponsiveImageObject extends Image {
 		$rSizes = array_keys(ResponsiveImage::$responsive_breakpoints);
 		$tags = '';
 		$sizes = $size ? array((string) $size) : $this->getMinWidths();
-		$imgTag = ResponsiveImage::get_image_tag();
+		$imgTag = $this->imageTag ? $this->imageTag : ResponsiveImage::get_image_tag();
 		$retina = $this->IsRetina ? '(min-device-pixel-ratio: 2.0)' : '';
 
 		foreach ($sizes as $s) {
