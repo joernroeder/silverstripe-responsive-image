@@ -18,33 +18,49 @@
 			if( ps[ i ].getAttribute( "data-picture" ) !== null ){
 
 				var sources = ps[ i ].getElementsByTagName( w.picturefill_opts.imageTag ),
-					matches = [];
-			
+					matches = [],
+					width = ps[ i ].offsetWidth;
+
 				// See if which sources match
 				for( var j = 0, jl = sources.length; j < jl; j++ ){
-					var media = sources[ j ].getAttribute( "data-media" );
+					var media = sources[ j ].getAttribute( "data-media" ),
+						ratio = ps[ j ].getAttribute( "data-ratio" );
+
 					// if there's no media specified, OR w.matchMedia is supported 
 					if( !media || ( w.matchMedia && w.matchMedia( media ).matches ) ){
+
 						matches.push( sources[ j ] );
+						
+						/*if (!ratio) {
+							ratios.push(0);
+						}
+						else {
+							ratios.push(width / ratio);
+						}*/
 					}
 				}
 
-			// Find any existing img element in the picture element
-			var picImg = ps[ i ].getElementsByTagName( "img" )[ 0 ];
+				// Find any existing img element in the picture element
+				var picImg = ps[ i ].getElementsByTagName( "img" )[ 0 ],
+					img;
 
-			if( matches.length ){			
-				if( !picImg ){
-					picImg = w.document.createElement( "img" );
-					picImg.alt = ps[ i ].getAttribute( "data-alt" );
-					ps[ i ].appendChild( picImg );
+				if( matches.length ){			
+					if( !picImg ){
+						picImg = w.document.createElement( "img" );
+						picImg.alt = ps[ i ].getAttribute( "data-alt" );
+
+						ps[ i ].appendChild( picImg );
+					}
+					
+					img = matches.pop();
+					
+					picImg.src = img.getAttribute( "data-src");
+					picImg.height = width / parseFloat(img.getAttribute('data-ratio'), 10);
 				}
-				
-				picImg.src =  matches.pop().getAttribute( "data-src" );
+				else if( picImg ){
+					ps[ i ].removeChild( picImg );
+				}
 			}
-			else if( picImg ){
-				ps[ i ].removeChild( picImg );
-			}
-		}
 		}
 	};
 	

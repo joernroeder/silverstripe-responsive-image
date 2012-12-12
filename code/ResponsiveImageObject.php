@@ -30,8 +30,6 @@ class ResponsiveImageObject extends Image {
 
 		$breakpoints = ResponsiveImage::get_responsive_breakpoints();
 		$minWidthField = new CheckboxSetField('MinWidth', 'Minimum width of the screen', $breakpoints);
-		//$minWidthField = new DropdownField('MinWidth', 'Minimum width of the screen', $breakpoints);
-		//$minWidthField->setEmptyString('Small');
 
 
 		$fields->addFieldsToTab('Root.Main', array(
@@ -91,16 +89,30 @@ class ResponsiveImageObject extends Image {
 				$media = $width . $and . $retina;
 				$mediaAttr = $media ? " data-media=\"$media\"" : '';
 			}
+			
+			// don't scale up
+			if ($this->getWidth() > $s) {
+				$resized = $this->getImageByWidth($s);
+				$link = $resized->Link();
+				$height = $resized->Height;
+				$width = $resized->Width;
+			} 
+			
+			// let the browser scale
+			else {
+				$link = $this->Link();
+				$height = $this->Height;
+				$width = $this->Width;
+			}
 
-			$link = $this->getResponsiveLink($s);
+			$ratio = $width / $height;
 
 			// return tag
-			$tags .= "<$imgTag data-src=\"{$link}\"$mediaAttr></$imgTag>\n";
+			$tags .= "<$imgTag data-ratio=\"{$ratio}\" data-src=\"{$link}\"$mediaAttr></$imgTag>\n";
 		}
 			
 		return $tags;
 	}
-
 
 	/**
 	 * returns the link for the formatted image
