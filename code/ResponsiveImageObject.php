@@ -105,7 +105,7 @@ class ResponsiveImageObject extends Image {
 				$width = $this->Width;
 			}
 
-			$ratio = $width / $height;
+			$ratio = ($height && $width) ? $width / $height : '';
 
 			// return tag
 			$tags .= "<$imgTag data-ratio=\"{$ratio}\" data-src=\"{$link}\"$mediaAttr></$imgTag>\n";
