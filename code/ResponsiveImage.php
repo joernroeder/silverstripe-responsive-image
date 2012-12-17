@@ -71,7 +71,8 @@ class ResponsiveImage extends DataObject {
 
 	static $summary_fields = array(
 		'Thumbnail',
-		'Title'
+		'Title',
+		'ID'
 	);
 
 	static $searchable_fields = array(
@@ -118,9 +119,14 @@ class ResponsiveImage extends DataObject {
 
 	// ! Class Members
 
+	/**
+	 * @var $extraClasses array Extra CSS-classes for the formfield-container
+	 */
+	protected $extraClasses;
+
 	protected $imageSizesCache = null;
 
-	function getCMSFields() {
+	public function getCMSFields() {
 		$fields = parent::getCMSFields();
 
 		$field = new UploadField('Images');
@@ -130,12 +136,47 @@ class ResponsiveImage extends DataObject {
 		return $fields;
 	}
 
-	function getThumbnail() {
+	public function getThumbnail() {
 		$image = $this->Images()->First();
 
 		if ($image) {
 			return $image->CMSThumbnail();
 		}
+	}
+
+	/**
+	 * Compiles all CSS-classes.
+	 * 
+	 * @return string CSS-classnames
+	 */
+	public function extraClass() {
+		$classes = array();
+
+		if($this->extraClasses) $classes = array_merge($classes, array_values($this->extraClasses));
+
+		return implode(' ', $classes);
+	}
+
+	/**
+	 * Add a CSS-class to the formfield-container.
+	 * 
+	 * @param $class String
+	 */
+	public function addExtraClass($class) {
+		$this->extraClasses[$class] = $class;
+		return $this;
+	}
+
+	/**
+	 * Remove a CSS-class from the formfield-container.
+	 * 
+	 * @param $class String
+	 */
+	public function removeExtraClass($class) {
+		$pos = array_search($class, $this->extraClasses);
+		if($pos !== false) unset($this->extraClasses[$pos]);
+
+		return $this;
 	}
 
 	/**
@@ -236,7 +277,9 @@ class ResponsiveImage extends DataObject {
 		$imgTag = $this->imageElement ? $this->imageElement : self::get_image_tag();
 
 		$alt = $this->Title;
-		$tag = "<$wrapperTag data-picture data-alt=\"{$this->Title}\">\n";
+		$extraClass = $this->extraClass();
+		$extraClass = $extraClass ? " class=\"{$extraClass}\"" : '';
+		$tag = "<$wrapperTag data-picture data-alt=\"{$this->Title}\"{$extraClass}>\n";
 
 		// collect images
 		$images = $this->getTagsBySize();
