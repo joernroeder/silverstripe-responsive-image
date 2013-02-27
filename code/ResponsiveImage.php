@@ -205,9 +205,11 @@ class ResponsiveImage extends DataObject {
 		$tags = array();
 
 		foreach ($this->getImagesBySize() as $image) {
-			$image->setImageTag($imgTag);
-			$imgs = $image->getResponsiveTagsByWidth();
-			$tags = array_unique($tags + $imgs);
+			if ($image) {
+				$image->setImageTag($imgTag);
+				$imgs = $image->getResponsiveTagsByWidth();
+				$tags = array_unique($tags + $imgs);
+			}
 		}
 
 		return $tags;

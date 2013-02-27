@@ -46,10 +46,20 @@ class ResponsiveImageObject extends Image {
 	 * @return array
 	 */
 	function getMinWidths() {
-		$widths = explode(',', $this->MinWidth);
+
+		$minWidths = $this->MinWidth ? $this->MinWidth : (String) $this->getLargestBreakpoint();
+		
+		$widths = explode(',', $minWidths);
 		sort($widths);
 
 		return $widths;
+	}
+
+	function getLargestBreakpoint() {
+		$points = array_keys(ResponsiveImage::$responsive_breakpoints);
+		sort($points);
+
+		return end($points);
 	}
 
 	function getImageByWidth($width) {
@@ -209,4 +219,5 @@ class ResponsiveImageObject extends Image {
 			$this->MinWidth = implode(',', $sizes);
 		}
 	}
+	
 }
