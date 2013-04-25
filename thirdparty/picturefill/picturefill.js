@@ -1,7 +1,7 @@
 /*! Picturefill - Responsive Images that work today. (and mimic the proposed Picture element with divs). Author: Scott Jehl, Filament Group, 2012 | License: MIT/GPLv2 */
 
 (function( w ){
-	
+
 	// Enable strict mode
 	"use strict";
 
@@ -10,14 +10,16 @@
 		imageTag: 'span'
 	};
 
-	w.picturefill = function() {
-		var ps = w.document.getElementsByTagName( w.picturefill_opts.wrapperTag );
-		
+	w.picturefill = function(options) {
+		options = options || w.picturefill_opts;
+
+		var ps = w.document.getElementsByTagName( options.wrapperTag );
+
 		// Loop the pictures
 		for( var i = 0, il = ps.length; i < il; i++ ){
 			if( ps[ i ].getAttribute( "data-picture" ) !== null ){
 
-				var sources = ps[ i ].getElementsByTagName( w.picturefill_opts.imageTag ),
+				var sources = ps[ i ].getElementsByTagName( options.imageTag ),
 					matches = [],
 					width = ps[ i ].offsetWidth;
 
@@ -30,7 +32,7 @@
 					if( !media || ( w.matchMedia && w.matchMedia( media ).matches ) ){
 
 						matches.push( sources[ j ] );
-						
+
 						/*if (!ratio) {
 							ratios.push(0);
 						}
@@ -44,16 +46,16 @@
 				var picImg = ps[ i ].getElementsByTagName( "img" )[ 0 ],
 					img;
 
-				if( matches.length ){			
+				if( matches.length ){
 					if( !picImg ){
 						picImg = w.document.createElement( "img" );
 						picImg.alt = ps[ i ].getAttribute( "data-alt" );
 
 						ps[ i ].appendChild( picImg );
 					}
-					
+
 					img = matches.pop();
-					
+
 					picImg.src = img.getAttribute( "data-src");
 					picImg.height = width / parseFloat(img.getAttribute('data-ratio'), 10);
 				}
@@ -63,7 +65,7 @@
 			}
 		}
 	};
-	
+
 	// Run on resize and domready (w.load as a fallback)
 	if( w.addEventListener ){
 		w.addEventListener( "resize", w.picturefill, false );
@@ -77,5 +79,5 @@
 	else if( w.attachEvent ){
 		w.attachEvent( "onload", w.picturefill );
 	}
-	
+
 }( this ));

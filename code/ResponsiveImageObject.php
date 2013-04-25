@@ -46,10 +46,8 @@ class ResponsiveImageObject extends Image {
 	 * @return array
 	 */
 	function getMinWidths() {
-
 		$minWidths = $this->MinWidth ? $this->MinWidth : (String) $this->getLargestBreakpoint();
-		
-		$widths = explode(',', $minWidths);
+		$widths = explode(',', $this->MinWidth);
 		sort($widths);
 
 		return $widths;
@@ -122,6 +120,50 @@ class ResponsiveImageObject extends Image {
 		}
 			
 		return $tags;
+	}
+
+	function getLinksBySize() {
+		$sizes = array_keys(ResponsiveImage::$responsive_breakpoints); //$this->getMinWidths();
+		$urls = array();
+
+		foreach ($sizes as $s) {
+			$str_size = (string) $s;
+
+			if ($this->getWidth() > $s) {
+				$resized = $this->getImageByWidth($s);
+				$urls[$str_size] = $resized->Link();
+			}
+			else {
+				$urls[$str_size] = $this->Link();
+			}
+		}
+
+		return $urls;
+	}
+
+	function getImageDataBySize() {
+		$sizes = array_keys(ResponsiveImage::$responsive_breakpoints);
+		$data = array();
+
+		foreach ($sizes as $size) {
+			$str_size = (string) $size;
+
+			$data[$str_size] = array(
+				'Width' => $size
+			);
+
+			if ($this->getWidth() > $size) {
+				$resized = $this->getImageByWidth($size);
+				$data[$str_size]['Height'] = $resized->getHeight();
+				$data[$str_size]['Url'] = $resized->Link();
+			}
+			else {
+				$data[$str_size]['Height'] = $this->getHeight();
+				$data[$str_size]['Url'] = $this->Link();
+			}
+			
+		}
+		return $data;
 	}
 
 	/**

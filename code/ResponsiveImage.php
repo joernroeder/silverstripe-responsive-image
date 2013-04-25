@@ -12,7 +12,7 @@ class ResponsiveImage extends DataObject {
 
 	// ! Config
 
-	public static $responsive_breakpoints = array(
+	static $responsive_breakpoints = array(
 		'320' => 'mini',
 		'480' => 'small',
 		'768' => 'medium',
@@ -50,7 +50,7 @@ class ResponsiveImage extends DataObject {
 	 *
 	 * @static
 	 */
-	public static $default_elements = array(
+	private static $default_elements = array(
 		'wrapper'	=> 'div',
 		'image'		=> 'div'
 	);
@@ -100,6 +100,14 @@ class ResponsiveImage extends DataObject {
 		return isset(self::$responsive_breakpoints[$size]) ? self::$responsive_breakpoints[$size] : '';
 	}
 
+	public static function set_wrapper_tag($value) {
+		self::$default_elements['wrapper'] = $value;
+	}
+
+	public static function set_image_tag($value) {
+		self::$default_elements['image'] = $value;
+	}
+
 	/**
 	 * @static
 	 * @return string
@@ -125,6 +133,8 @@ class ResponsiveImage extends DataObject {
 	protected $extraClasses;
 
 	protected $imageSizesCache = null;
+	protected $urlSizesCache = null;
+	protected $imageDataCache = null;
 
 	public function getCMSFields() {
 		$fields = parent::getCMSFields();
@@ -260,6 +270,34 @@ class ResponsiveImage extends DataObject {
 		}
 		
 		return $this->imageSizesCache;
+	}
+
+	function getLinksBySize() {
+		if (!$this->urlSizeCache) {
+			$urls = array();
+
+			foreach ($this->Images() as $image) {
+				$urls[] = $image->getLinksBySize();
+			}
+
+			$this->urlSizesCache = $urls;
+		}
+
+		return $this->urlSizesCache;
+	}
+
+	function getImageDataBySize() {
+		if (!$this->imageDataCache) {
+			$datas = array();
+
+			foreach ($this->Images() as $image) {
+				$datas[] = $image->getImageDataBySize();
+			}
+
+			$this->imageDataCache = $datas;
+		}
+
+		return $this->imageDataCache;
 	}
 
 	public function forTemplate() {
