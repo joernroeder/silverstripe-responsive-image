@@ -325,7 +325,7 @@ class ResponsiveImage extends DataObject {
 		$images = $this->getTagsBySize();
 
 		// sort
-		$sizes = array_keys(self::$responsive_breakpoints);
+		$sizes = array_keys(self::get_responsive_breakpoints());
 		foreach ($sizes as $i => $size) {
 			if (isset($images[$size]) && $images[$size]) {
 				$tag .= "\t".$images[$size];
