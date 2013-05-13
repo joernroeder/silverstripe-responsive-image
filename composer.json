@@ -1,0 +1,21 @@
+{
+	"name": "joernroeder/silverstripe-responsive-image",
+	"type": "silverstripe-module",
+	"description": "Access static files from external (sub)-domains.",
+	"homepage": "https://github.com/joernroeder/silverstripe-responsive-image",
+	"license": "BSD-3-Clause",
+	"keywords": ["silverstripe", "responsive", "image"],
+	"authors": [
+		{
+			"name": "Jörn Röder",
+			"homepage": "http://joernroeder.de"
+		}
+	],
+	"require": {
+		"silverstripe/framework": ">=3.1.x-dev,<4.0"
+	},
+	"extra": {
+		"installer-name": "responsive-image",
+		"installer-paths": "responsive-image"
+    }
+}
