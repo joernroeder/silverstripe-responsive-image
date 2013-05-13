@@ -5,16 +5,16 @@
  */
 class ResponsiveImageObject extends Image {
 
-	static $db = array(
+	private static $db = array(
 		'IsRetina'	=> 'Boolean',
 		'MinWidth'	=> 'Varchar(50)'
 	);
 
-	static $has_one = array(
+	private static $has_one = array(
 		'Responsive' => 'ResponsiveImage'
 	);
 
-	static $default_width_name = 'Small';
+	private static $default_width_name = 'Small';
 
 	protected $imageTag = null;
 
@@ -28,7 +28,7 @@ class ResponsiveImageObject extends Image {
 			'Name'
 		));
 
-		$breakpoints = ResponsiveImage::get_responsive_breakpoints();
+		$breakpoints = ResponsiveImage::get_responsive_breakpoint_sizes();
 		$minWidthField = new CheckboxSetField('MinWidth', 'Minimum width of the screen', $breakpoints);
 
 
@@ -54,7 +54,7 @@ class ResponsiveImageObject extends Image {
 	}
 
 	function getLargestBreakpoint() {
-		$points = array_keys(ResponsiveImage::$responsive_breakpoints);
+		$points = array_keys(ResponsiveImage::get_responsive_breakpoints());
 		sort($points);
 
 		return end($points);
@@ -78,7 +78,7 @@ class ResponsiveImageObject extends Image {
 	 * @return string
 	 */
 	function getResponsiveTag($size = null, $includeMedia = true) {
-		$rSizes = array_keys(ResponsiveImage::$responsive_breakpoints);
+		$rSizes = array_keys(ResponsiveImage::get_responsive_breakpoints());
 		$tags = '';
 		$sizes = $size ? array((string) $size) : $this->getMinWidths();
 		$imgTag = $this->imageTag ? $this->imageTag : ResponsiveImage::get_image_tag();
@@ -123,7 +123,7 @@ class ResponsiveImageObject extends Image {
 	}
 
 	function getLinksBySize() {
-		$sizes = array_keys(ResponsiveImage::$responsive_breakpoints); //$this->getMinWidths();
+		$sizes = array_keys(ResponsiveImage::get_responsive_breakpoints()); //$this->getMinWidths();
 		$urls = array();
 
 		foreach ($sizes as $s) {
@@ -142,7 +142,7 @@ class ResponsiveImageObject extends Image {
 	}
 
 	function getImageDataBySize() {
-		$sizes = array_keys(ResponsiveImage::$responsive_breakpoints);
+		$sizes = array_keys(ResponsiveImage::get_responsive_breakpoints());
 		$data = array();
 
 		foreach ($sizes as $size) {
@@ -199,7 +199,7 @@ class ResponsiveImageObject extends Image {
 	}
 
 	function getMinWidthName() {
-		$points = ResponsiveImage::$responsive_breakpoints;
+		$points = ResponsiveImage::get_responsive_breakpoints();
 
 		$names = array();//self::$default_width_name;
 		$sizes = explode(',', $this->MinWidth);
@@ -245,7 +245,7 @@ class ResponsiveImageObject extends Image {
 		
 		$namePoints = explode('-', $name);
 
-		$points = ResponsiveImage::$responsive_breakpoints;
+		$points = ResponsiveImage::get_responsive_breakpoints();
 		$pointSizes = array_keys($points);
 		$pointNames = array_values($points);
 
