@@ -420,4 +420,11 @@ class ResponsiveImage extends DataObject {
 
 		return false;
 	}
+
+	public function onBeforeDelete() {
+ 		parent::onBeforeDelete();
+ 		foreach ($this->Images() as $responsiveImage) {
+ 			$responsiveImage->delete();
+ 		}
+ 	}
 }
