@@ -111,20 +111,12 @@ class ResponsiveImage extends DataObject {
 		return isset($points[$size]) ? self::$points[$size] : '';
 	}
 
-	public static function set_wrapper_tag($value) {
-		self::$default_elements['wrapper'] = $value;
-	}
-
-	public static function set_image_tag($value) {
-		self::$default_elements['image'] = $value;
-	}
-
 	/**
 	 * @static
 	 * @return string
 	 */
 	public static function get_wrapper_tag() {
-		return isset(self::$default_elements['wrapper']) ? self::$default_elements['wrapper'] : 'div';
+		return isset(self::config()->default_elements['wrapper']) ? self::config()->default_elements['wrapper'] : 'div';
 	}
 
 	/**
@@ -132,7 +124,7 @@ class ResponsiveImage extends DataObject {
 	 * @return string
 	 */
 	public static function get_image_tag() {
-		return isset(self::$default_elements['image']) ? self::$default_elements['image'] : 'div';
+		return isset(self::config()->default_elements['image']) ? self::config()->default_elements['image'] : 'div';
 	}
 
 
