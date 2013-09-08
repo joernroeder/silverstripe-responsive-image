@@ -60,8 +60,33 @@ class ResponsiveImageObject extends Image {
 		return end($points);
 	}
 
-	function getImageByWidth($width) {
-		return $this->SetWidth($width);
+	function getWidthBySet($set, $width) {
+		if ($config = ResponsiveImage::get_set_config($set, $width)) {
+			$width = isset($config['size']) ? $config['size'] : $width;
+		}
+
+		return $width;
+	}
+
+	function getMethodBySet($set, $width) {
+		$method = null;
+		
+		if ($config = ResponsiveImage::get_set_config($set, $width)) {
+			$method = isset($config['method']) ? $config['method'] : Config::inst()->get('ResponsiveImage', 'default_method');
+		}
+
+		return $method ? $method : 'SetWidth';
+	}
+
+	function getImageByWidth($width, $set = null) {
+		$size = $width;
+		$method = $this->getMethodBySet($set, $width);
+
+		if ($set) {
+			$size = $this->getWidthBySet($set, $width);
+		}
+
+		return $this->$method($size);
 	}
 
 	function setImageTag($value) {
@@ -77,7 +102,7 @@ class ResponsiveImageObject extends Image {
 	 * @param boolean include media infos
 	 * @return string
 	 */
-	function getResponsiveTag($size = null, $includeMedia = true) {
+	function getResponsiveTag($size = null, $includeMedia = true, $set = null) {
 		$rSizes = array_keys(ResponsiveImage::get_responsive_breakpoints());
 		$tags = '';
 		$sizes = $size ? array((string) $size) : $this->getMinWidths();
@@ -99,8 +124,8 @@ class ResponsiveImageObject extends Image {
 			}
 			
 			// don't scale up
-			if ($this->getWidth() > $s) {
-				$resized = $this->getImageByWidth($s);
+			if ($this->getWidth() > $this->getWidthBySet($set, $s)) {
+				$resized = $this->getImageByWidth($s, $set);
 				$link = $resized->Link();
 				$height = $resized->Height;
 				$width = $resized->Width;
@@ -122,7 +147,7 @@ class ResponsiveImageObject extends Image {
 		return $tags;
 	}
 
-	function getLinksBySize() {
+	function getLinksBySize($set = null) {
 		$sizes = array_keys(ResponsiveImage::get_responsive_breakpoints()); //$this->getMinWidths();
 		$urls = array();
 
@@ -130,7 +155,7 @@ class ResponsiveImageObject extends Image {
 			$str_size = (string) $s;
 
 			if ($this->getWidth() > $s) {
-				$resized = $this->getImageByWidth($s);
+				$resized = $this->getImageByWidth($s, $set);
 				$urls[$str_size] = $resized->Link();
 			}
 			else {
@@ -141,7 +166,7 @@ class ResponsiveImageObject extends Image {
 		return $urls;
 	}
 
-	function getImageDataBySize() {
+	function getImageDataBySize($set = null) {
 		$sizes = array_keys(ResponsiveImage::get_responsive_breakpoints());
 		$data = array();
 
@@ -152,8 +177,13 @@ class ResponsiveImageObject extends Image {
 				'Width' => $size
 			);
 
-			if ($this->getWidth() > $size) {
-				$resized = $this->getImageByWidth($size);
+			// @todo check against set size
+			if ($set) {
+				$width = $this->getWidthBySet($set, $size);
+			}
+
+			if ($this->getWidth() > $width) {
+				$resized = $this->getImageByWidth($size, $set);
 				$data[$str_size]['Height'] = $resized->getHeight();
 				$data[$str_size]['Url'] = $resized->Link();
 			}
@@ -172,10 +202,10 @@ class ResponsiveImageObject extends Image {
 	 * @param string|int size
 	 * @return string
 	 */
-	function getResponsiveLink($size) {
+	function getResponsiveLink($size, $set = null) {
 		// don't scale up
-		if ($this->getWidth() > $size) {
-			$resized = $this->getImageByWidth($size);
+		if ($this->getWidth() > $this->getWidthBySet($set, $size)) {
+			$resized = $this->getImageByWidth($size, $set);
 			$link = $resized->Link();
 		} 
 		
@@ -187,12 +217,12 @@ class ResponsiveImageObject extends Image {
 		return $link;
 	}
 
-	function getResponsiveTagsByWidth() {
+	function getResponsiveTagsByWidth($set = null) {
 		$imgSizes = $this->getMinWidths();
 		$sizes = array();
 
 		foreach ($imgSizes as $size) {
-			$sizes[(string)$size] = $this->getResponsiveTag($size);
+			$sizes[(string)$size] = $this->getResponsiveTag($size, true, $set);
 		}
 
 		return $sizes;

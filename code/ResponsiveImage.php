@@ -86,7 +86,15 @@ class ResponsiveImage extends DataObject {
 	);
 
 	public static function get_responsive_breakpoints() {
-		return self::config()->responsive_breakpoints;
+		$breakPoints = array();
+		$points = self::config()->break_points;
+
+		foreach ($points as $dim => $point) {
+			$breakPoints[$dim] = isset($point['name']) ? $point['name'] : (string) $dim;
+		}
+
+		return $breakPoints;
+		//return self::config()->responsive_breakpoints;
 	}
 
 	public static function get_responsive_breakpoint_sizes() {
@@ -125,6 +133,22 @@ class ResponsiveImage extends DataObject {
 	 */
 	public static function get_image_tag() {
 		return isset(self::config()->default_elements['image']) ? self::config()->default_elements['image'] : 'div';
+	}
+
+	/**
+	 *
+	 * @static
+	 * @return array
+	 */
+	public static function get_set_config($set, $width) {
+		$breakpoints = self::config()->break_points;
+
+		if (isset($breakpoints[$width]['sets'][$set])) {
+			return $breakpoints[$width]['sets'][$set];
+		}
+		else {
+			return false;
+		}
 	}
 
 
@@ -200,12 +224,12 @@ class ResponsiveImage extends DataObject {
 	 *
 	 * @return string
 	 */
-	public function getImage($wrapper = null, $image = null) {
-		return $this->getTag($wrapper, $image);
+	public function getImage($wrapper = null, $image = null, $set = null) {
+		return $this->getTag($wrapper, $image, $set);
 	}
 
-	public function Image($wrapper = null, $image = null) {
-		return $this->getImage($wrapper, $image);
+	public function Image($wrapper = null, $image = null, $set = null) {
+		return $this->getImage($wrapper, $image, $set);
 	}
 
 	/**
@@ -213,14 +237,14 @@ class ResponsiveImage extends DataObject {
 	 *
 	 * @return string
 	 */
-	public function getTagsBySize() {
+	public function getTagsBySize($set = null) {
 		$imgTag = $this->imageElement ? $this->imageElement : self::get_image_tag();
 		$tags = array();
 
 		foreach ($this->getImagesBySize() as $image) {
 			if ($image) {
 				$image->setImageTag($imgTag);
-				$imgs = $image->getResponsiveTagsByWidth();
+				$imgs = $image->getResponsiveTagsByWidth($set);
 				$tags = array_unique($tags + $imgs);
 			}
 		}
@@ -234,7 +258,7 @@ class ResponsiveImage extends DataObject {
 	 * @param string|int size
 	 * @return string
 	 */
-	public function getTagBySize($size) {
+	public function getTagBySize($size, $set = null) {
 		$images = $this->getTagsBySize();
 		$size = (string) $size;
 
@@ -244,7 +268,7 @@ class ResponsiveImage extends DataObject {
 		else {
 			$closestImage = $this->getClosestImage($size);
 			if ($closestImage) {
-				return $closestImage->getResponsiveTag($size);
+				return $closestImage->getResponsiveTag($size, true, $set);
 			}
 			else {
 				user_error("couldn't find an image for minimum width {$size}px", E_USER_ERROR);
@@ -275,12 +299,12 @@ class ResponsiveImage extends DataObject {
 		return $this->imageSizesCache;
 	}
 
-	function getLinksBySize() {
+	function getLinksBySize($set = null) {
 		if (!$this->urlSizeCache) {
 			$urls = array();
 
 			foreach ($this->Images() as $image) {
-				$urls[] = $image->getLinksBySize();
+				$urls[] = $image->getLinksBySize($set);
 			}
 
 			$this->urlSizesCache = $urls;
@@ -289,12 +313,12 @@ class ResponsiveImage extends DataObject {
 		return $this->urlSizesCache;
 	}
 
-	function getImageDataBySize() {
+	function getImageDataBySize($set = null) {
 		if (!$this->imageDataCache) {
 			$datas = array();
 
 			foreach ($this->Images() as $image) {
-				$datas[] = $image->getImageDataBySize();
+				$datas[] = $image->getImageDataBySize($set);
 			}
 
 			$this->imageDataCache = $datas;
@@ -312,7 +336,7 @@ class ResponsiveImage extends DataObject {
 	 *
 	 * @return string
 	 */
-	public function getTag($wrapper = null, $image = null) {
+	public function getTag($wrapper = null, $image = null, $set = null) {
 		$this->wrapperElement = $wrapper;
 		$this->imageElement = $image;
 
@@ -322,7 +346,7 @@ class ResponsiveImage extends DataObject {
 		$alt = $this->Title;
 		$extraClass = $this->extraClass();
 		$extraClass = $extraClass ? " class=\"{$extraClass}\"" : '';
-		$tag = "<$wrapperTag data-picture data-alt=\"{$this->Title}\"{$extraClass}>\n";
+		$tag = "<$wrapperTag data-lazy-picture data-picture data-alt=\"{$this->Title}\"{$extraClass}>\n";
 
 		// collect images
 		$images = $this->getTagsBySize();
@@ -338,7 +362,7 @@ class ResponsiveImage extends DataObject {
 
 				if ($closestImage) {
 					$closestImage->setImageTag($imgTag);
-					$tag .= "\t".$closestImage->getResponsiveTag($size);
+					$tag .= "\t" .  $closestImage->getResponsiveTag($size, true, $set);
 				}
 				else {
 					//user_error("couldn't find an image for minimum width {$size}px", E_USER_WARNING);
@@ -358,7 +382,7 @@ class ResponsiveImage extends DataObject {
 			if ($ieDesktopImage) {
 				$ieDesktopImage->setImageTag($imgTag);
 				$tag .= "\n\t".'<!--[if (lt IE 9) & (!IEMobile)]>'."\n";
-				$tag .= "\t\t".$ieDesktopImage->getResponsiveTag($sizes[$closestIndex]);
+				$tag .= "\t\t".$ieDesktopImage->getResponsiveTag($sizes[$closestIndex], true, $set);
 				$tag .= "\t".'<![endif]-->'."\n";
 			}
 		}
@@ -368,7 +392,7 @@ class ResponsiveImage extends DataObject {
 			$noscriptImage = $this->getClosestImage($sizes[0]);
 
 			if ($noscriptImage) {
-				$link = $noscriptImage->getResponsiveLink($sizes[0]);
+				$link = $noscriptImage->getResponsiveLink($sizes[0], $set);
 				$alt = Convert::raw2att($this->Title);
 
 				$tag .= "\n\t".'<noscript>'."\n";
@@ -388,12 +412,12 @@ class ResponsiveImage extends DataObject {
 	 * @param int|string size
 	 * @return ResponsiveImage|false
 	 */
-	function getClosestImage($size) {
+	function getClosestImage($size, $set = null) {
 		if ($this->Images()->Count() < 1) return false;
 		if ($this->Images()->Count() == 1) return $this->Images()->First();
 
 		$images = $this->getImagesBySize();
-		$sizes = array_keys(self::$responsive_breakpoints);
+		$sizes = array_keys(self::get_responsive_breakpoints());
 		$startPos = array_search((string)$size, $sizes);
 
 		if ($images) {

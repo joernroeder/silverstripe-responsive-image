@@ -7,7 +7,9 @@
 
 	w.picturefill_opts = {
 		wrapperTag: 'span',
-		imageTag: 'span'
+		imageTag: 'span',
+		// transparent 1x1.gif
+		loaderImg: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
 	};
 
 	w.picturefill = function(options) {
@@ -56,7 +58,10 @@
 
 					img = matches.pop();
 
-					picImg.src = img.getAttribute( "data-src");
+					picImg.src = w.picturefill_opts.loaderImg;//img.getAttribute( "data-src");
+					console.log(picImg.className.indexOf('loaded'));
+					picImg.setAttribute('data-original', img.getAttribute( "data-src"));
+					picImg.className += ' picturefilled';
 					picImg.height = width / parseFloat(img.getAttribute('data-ratio'), 10);
 				}
 				else if( picImg ){
