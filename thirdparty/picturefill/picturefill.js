@@ -13,7 +13,12 @@
 	};
 
 	w.picturefill = function(options) {
-		options = options || w.picturefill_opts;
+		if (options && (options.wrapperTag || options.imageTag || options.loaderImg)) {
+			options = options;
+		}
+		else {
+			options = w.picturefill_opts;
+		}
 
 		var ps = w.document.getElementsByTagName( options.wrapperTag );
 
@@ -44,7 +49,6 @@
 					}
 				}
 
-				// Find any existing img element in the picture element
 				var picImg = ps[ i ].getElementsByTagName( "img" )[ 0 ],
 					img;
 
@@ -59,7 +63,6 @@
 					img = matches.pop();
 
 					picImg.src = w.picturefill_opts.loaderImg;//img.getAttribute( "data-src");
-					console.log(picImg.className.indexOf('loaded'));
 					picImg.setAttribute('data-original', img.getAttribute( "data-src"));
 					picImg.className += ' picturefilled';
 					picImg.height = width / parseFloat(img.getAttribute('data-ratio'), 10);
