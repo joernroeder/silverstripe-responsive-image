@@ -437,6 +437,13 @@ class ResponsiveImage extends DataObject {
 		return false;
 	}
 
+	public function getLargestImage() {
+		$breakPoints = array_keys(self::get_responsive_breakpoints());
+		$largestSize = end($breakPoints);
+		
+		return $this->getClosestImage($largestSize);
+	}
+
 	public function onBeforeDelete() {
  		parent::onBeforeDelete();
  		foreach ($this->Images() as $responsiveImage) {
