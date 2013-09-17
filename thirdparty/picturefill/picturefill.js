@@ -12,7 +12,10 @@
 		loaderImg: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
 	};
 
+	w.picturefill_timeout = null;
+
 	w.picturefill = function(options) {
+		console.log('PICTURE-FILL');
 		if (options && (options.wrapperTag || options.imageTag || options.loaderImg)) {
 			options = options;
 		}
@@ -25,7 +28,6 @@
 		// Loop the pictures
 		for( var i = 0, il = ps.length; i < il; i++ ){
 			if( ps[ i ].getAttribute( "data-picture" ) !== null ){
-
 				var sources = ps[ i ].getElementsByTagName( options.imageTag ),
 					matches = [],
 					width = ps[ i ].offsetWidth;
@@ -39,18 +41,12 @@
 					if( !media || ( w.matchMedia && w.matchMedia( media ).matches ) ){
 
 						matches.push( sources[ j ] );
-
-						/*if (!ratio) {
-							ratios.push(0);
-						}
-						else {
-							ratios.push(width / ratio);
-						}*/
 					}
 				}
 
 				var picImg = ps[ i ].getElementsByTagName( "img" )[ 0 ],
-					img;
+					img,
+					src;
 
 				if( matches.length ){
 					if( !picImg ){
@@ -61,22 +57,41 @@
 					}
 
 					img = matches.pop();
+					src = img.getAttribute( "data-src");
 
-					picImg.src = w.picturefill_opts.loaderImg;//img.getAttribute( "data-src");
-					picImg.setAttribute('data-original', img.getAttribute( "data-src"));
-					picImg.className += ' picturefilled';
-					picImg.height = width / parseFloat(img.getAttribute('data-ratio'), 10);
+					if (src != picImg.src) {
+						ps[i].removeAttribute('class');
+						
+						picImg.src = w.picturefill_opts.loaderImg;//img.getAttribute( "data-src");
+						picImg.setAttribute('data-original', img.getAttribute( "data-src"));
+						picImg.className = 'picturefilled';
+						picImg.height = width / parseFloat(img.getAttribute('data-ratio'), 10);
+					}
 				}
 				else if( picImg ){
 					ps[ i ].removeChild( picImg );
 				}
 			}
 		}
+
+		var evt = document.createEvent('Events');
+		evt.initEvent('picturefilled', true, true); //true for can bubble, true for cancelable
+		window.dispatchEvent(evt);
 	};
 
 	// Run on resize and domready (w.load as a fallback)
 	if( w.addEventListener ){
-		w.addEventListener( "resize", w.picturefill, false );
+
+		// I've added small timeout here to prevent unnecessary image loading during window resizing
+		w.addEventListener( "resize", function(){
+			if (w.picturefill_timeout) {
+				clearTimeout(w.picturefill_timeout);
+			}
+
+			w.picturefill_timeout = setTimeout(function() {
+				w.picturefill();
+			}, 100);
+		}, false );
 		w.addEventListener( "DOMContentLoaded", function(){
 			w.picturefill();
 			// Run once only
